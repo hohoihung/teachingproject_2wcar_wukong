@@ -140,7 +140,7 @@ wuKong.setAllMotor(0, 0)
 _speed = 10
 _inMotion = 0
 _maxSpeed = 100
-_speedThreshold = 5
+_speedThreshold = 30
 _obsDistance = 15
 _fallDistance = 5
 _collide = 0
