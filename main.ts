@@ -4,7 +4,7 @@ function moveReverse () {
     } else if (_speed >= _speedThreshold) {
         _speed = _maxSpeed
     }
-    wuKong.setAllMotor(0 - _speed, _speed)
+    wuKong.setAllMotor(_speed, 0 - _speed)
     _inMotion = 1
 }
 function moveRight () {
@@ -13,7 +13,7 @@ function moveRight () {
     } else if (_speed >= _speedThreshold) {
         _speed = _maxSpeed
     }
-    wuKong.setAllMotor(_speed, 0)
+    wuKong.setAllMotor(0 - _speed, 0)
     _inMotion = 1
 }
 function moveForward () {
@@ -22,16 +22,17 @@ function moveForward () {
     } else if (_speed >= _speedThreshold) {
         _speed = _maxSpeed
     }
-    wuKong.setAllMotor(_speed, 0 - _speed)
+    wuKong.setAllMotor(0 - _speed, _speed)
     _inMotion = 1
 }
 function avoid_collision () {
     if (Math.randomBoolean()) {
-    	
+        reverseLeft()
+        basic.pause(randint(300, 700))
     } else {
-    	
+        reverseRight()
+        basic.pause(randint(300, 700))
     }
-    basic.pause(randint(300, 700))
     if (!(_inMotion)) {
         stopMoving()
     } else {
@@ -39,7 +40,6 @@ function avoid_collision () {
     }
 }
 input.onLogoEvent(TouchButtonEvent.LongPressed, function () {
-    let _dist2 = 0
     serial.writeValue("Obstacle In Front", _dist1)
     serial.writeValue("collision flag", _collide)
     serial.writeValue("fall flag", _fall)
@@ -65,41 +65,46 @@ function reverseLeft () {
     } else if (_speed >= _speedThreshold) {
         _speed = _maxSpeed
     }
-    wuKong.setAllMotor(0 - _speed, 0)
+    wuKong.setAllMotor(_speed, 0)
     _inMotion = 1
 }
 input.onButtonPressed(Button.AB, function () {
     serial.writeValue("Obstacle In Front", _dist1)
+    serial.writeValue("Fall step In Front", _dist2)
 })
 input.onButtonPressed(Button.B, function () {
+    serial.redirectToUSB()
     if (_temp == 0) {
         stopMoving()
-        serial.writeString("stop moving")
+        serial.writeString("Stop")
+        basic.pause(1000)
     } else if (_temp == 1) {
-        serial.writeString("move reverse")
         moveReverse()
-        basic.pause(2000)
+        serial.writeString("move reverse")
+        basic.pause(1000)
     } else if (_temp == 2) {
-        serial.writeString("reverse left")
         reverseLeft()
-        basic.pause(2000)
+        serial.writeString("reverse left")
+        basic.pause(1000)
     } else if (_temp == 3) {
-        serial.writeString("reverse right")
         reverseRight()
-        basic.pause(2000)
+        serial.writeString("reverse right")
+        basic.pause(1000)
     } else if (_temp == 4) {
-        serial.writeString("move left")
         moveLeft()
-        basic.pause(2000)
+        serial.writeString("move left")
+        basic.pause(1000)
     } else if (_temp == 5) {
-        serial.writeString("move right")
         moveRight()
-        basic.pause(2000)
+        serial.writeString("move right")
+        basic.pause(1000)
     }
     _temp += 1
-    if (_temp > 6) {
+    if (_temp >= 6) {
         _temp = 0
     }
+    serial.writeValue("    ---->  _temp", _temp)
+    basic.pause(1000)
 })
 function reverseRight () {
     if (_speed <= _speedThreshold) {
@@ -119,6 +124,7 @@ function moveLeft () {
     wuKong.setAllMotor(0, _speed)
     _inMotion = 1
 }
+let _dist2 = 0
 let _dist1 = 0
 let _temp = 0
 let _fall = 0
@@ -131,18 +137,19 @@ let _inMotion = 0
 let _speed = 0
 radio.setGroup(8)
 wuKong.setAllMotor(0, 0)
-_speed = 40
+_speed = 10
 _inMotion = 0
 _maxSpeed = 100
-_speedThreshold = 35
-_obsDistance = 40
-_fallDistance = 3
+_speedThreshold = 5
+_obsDistance = 15
+_fallDistance = 5
 _collide = 0
 _fall = 0
 _temp = 0
 basic.showIcon(IconNames.SmallHeart)
 basic.forever(function () {
-    _dist1 = sonar.ping(
+    _dist1 = sonarbit.sonarbit_distance(Distance_Unit.Distance_Unit_cm, DigitalPin.P1)
+    _dist2 = sonar.ping(
     DigitalPin.P14,
     DigitalPin.P15,
     PingUnit.Centimeters
@@ -152,11 +159,18 @@ basic.forever(function () {
     } else {
         _collide = 0
     }
+    if (_dist2 > 0 && _dist2 > _fallDistance) {
+        _fall = 1
+    } else {
+        _fall = 0
+    }
     if (_inMotion && _collide) {
         avoid_collision()
         basic.showIcon(IconNames.No)
     } else if (_inMotion && _fall) {
         avoid_collision()
         basic.showIcon(IconNames.Surprised)
+    } else {
+        basic.clearScreen()
     }
 })
