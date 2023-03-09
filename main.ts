@@ -19,6 +19,19 @@ function moveForward () {
     wuKong.setAllMotor(_speed, 0 - _speed)
     _inMotion = 1
 }
+function avoid_collision () {
+    if (Math.randomBoolean()) {
+        reverseLeft()
+    } else {
+        reverseRight()
+    }
+    basic.pause(randint(300, 700))
+    if (!(_inMotion)) {
+        stopMoving()
+    } else {
+        moveForward()
+    }
+}
 input.onButtonPressed(Button.A, function () {
     moveForward()
 })
@@ -30,21 +43,29 @@ function reverseLeft () {
 	
 }
 input.onButtonPressed(Button.AB, function () {
-    stopMoving()
+    serial.writeValue("Obstacle In Front", sonar.ping(
+    DigitalPin.P14,
+    DigitalPin.P15,
+    PingUnit.Centimeters
+    ))
 })
 input.onButtonPressed(Button.B, function () {
     if (_temp == 0) {
         stopMoving()
-        basic.pause(5000)
     } else if (_temp == 1) {
-    	
+        moveReverse()
+        basic.pause(2000)
     } else if (_temp == 2) {
+        reverseLeft()
         basic.pause(2000)
     } else if (_temp == 3) {
+        reverseRight()
         basic.pause(2000)
     } else if (_temp == 4) {
+        moveLeft()
         basic.pause(2000)
     } else if (_temp == 5) {
+        moveRight()
         basic.pause(2000)
     }
     _temp += 1
@@ -58,6 +79,7 @@ function reverseRight () {
 function moveLeft () {
 	
 }
+let _dist1 = 0
 let _temp = 0
 let _speedThreshold = 0
 let _maxSpeed = 0
@@ -76,5 +98,21 @@ let _fall = 0
 _temp = 0
 basic.showIcon(IconNames.SmallHeart)
 basic.forever(function () {
-	
+    _dist1 = sonar.ping(
+    DigitalPin.P14,
+    DigitalPin.P15,
+    PingUnit.Centimeters
+    )
+    if (_dist1 > 0 && _dist1 < _obsDistance) {
+        _collide = 1
+    } else {
+        _collide = 0
+    }
+    if (_inMotion && _collide) {
+        avoid_collision()
+        basic.showIcon(IconNames.No)
+    } else if (_inMotion && _fall) {
+        avoid_collision()
+        basic.showIcon(IconNames.Surprised)
+    }
 })
