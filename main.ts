@@ -26,13 +26,13 @@ function moveForward () {
     _inMotion = 1
 }
 function avoid_collision () {
+    moveReverse()
     if (Math.randomBoolean()) {
         reverseLeft()
-        basic.pause(randint(300, 700))
     } else {
         reverseRight()
-        basic.pause(randint(300, 700))
     }
+    basic.pause(randint(300, 700))
     if (!(_inMotion)) {
         stopMoving()
     } else {
@@ -124,6 +124,10 @@ function moveLeft () {
     wuKong.setAllMotor(0, _speed)
     _inMotion = 1
 }
+function avoid_fall () {
+    stopMoving()
+    basic.pause(randint(300, 700))
+}
 let _dist2 = 0
 let _dist1 = 0
 let _temp = 0
@@ -141,7 +145,7 @@ _speed = 10
 _inMotion = 0
 _maxSpeed = 100
 _speedThreshold = 30
-_obsDistance = 15
+_obsDistance = 20
 _fallDistance = 5
 _collide = 0
 _fall = 0
@@ -168,9 +172,7 @@ basic.forever(function () {
         avoid_collision()
         basic.showIcon(IconNames.No)
     } else if (_inMotion && _fall) {
-        avoid_collision()
+        avoid_fall()
         basic.showIcon(IconNames.Surprised)
-    } else {
-        basic.clearScreen()
     }
 })
