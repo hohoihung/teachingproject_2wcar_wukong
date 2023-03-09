@@ -8,14 +8,25 @@ function moveForward () {
 	
 }
 input.onButtonPressed(Button.A, function () {
-	
+    moveForward()
 })
 function stopMoving () {
 	
 }
-input.onButtonPressed(Button.B, function () {
+function reverseLeft () {
 	
+}
+input.onButtonPressed(Button.AB, function () {
+    stopMoving()
 })
+input.onButtonPressed(Button.B, function () {
+    moveReverse()
+    basic.pause(5000)
+    stopMoving()
+})
+function reverseRight () {
+	
+}
 function moveLeft () {
 	
 }
