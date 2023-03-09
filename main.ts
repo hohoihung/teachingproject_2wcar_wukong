@@ -33,8 +33,24 @@ input.onButtonPressed(Button.AB, function () {
     stopMoving()
 })
 input.onButtonPressed(Button.B, function () {
-    basic.pause(5000)
-    stopMoving()
+    if (_temp == 0) {
+        stopMoving()
+        basic.pause(5000)
+    } else if (_temp == 1) {
+    	
+    } else if (_temp == 2) {
+        basic.pause(2000)
+    } else if (_temp == 3) {
+        basic.pause(2000)
+    } else if (_temp == 4) {
+        basic.pause(2000)
+    } else if (_temp == 5) {
+        basic.pause(2000)
+    }
+    _temp += 1
+    if (_temp > 6) {
+        _temp = 0
+    }
 })
 function reverseRight () {
 	
@@ -42,6 +58,7 @@ function reverseRight () {
 function moveLeft () {
 	
 }
+let _temp = 0
 let _speedThreshold = 0
 let _maxSpeed = 0
 let _inMotion = 0
@@ -56,6 +73,7 @@ let _obsDistance = 40
 let _fallDistance = 3
 let _collide = 0
 let _fall = 0
+_temp = 0
 basic.showIcon(IconNames.SmallHeart)
 basic.forever(function () {
 	
