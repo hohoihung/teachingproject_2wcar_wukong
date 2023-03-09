@@ -1,3 +1,24 @@
+function moveReverse () {
+	
+}
+function moveRight () {
+	
+}
+function moveForward () {
+	
+}
+input.onButtonPressed(Button.A, function () {
+	
+})
+function stopMoving () {
+	
+}
+input.onButtonPressed(Button.B, function () {
+	
+})
+function moveLeft () {
+	
+}
 radio.setGroup(8)
 wuKong.setAllMotor(0, 0)
 let _inMotion = 0
