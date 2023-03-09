@@ -13,7 +13,7 @@ function moveRight () {
     } else if (_speed >= _speedThreshold) {
         _speed = _maxSpeed
     }
-    wuKong.setAllMotor(0 - _speed, 0)
+    wuKong.setAllMotor(0, 0 - _speed)
     _inMotion = 1
 }
 function moveForward () {
@@ -27,12 +27,13 @@ function moveForward () {
 }
 function avoid_collision () {
     moveReverse()
+    basic.pause(randint(1000, 2000))
     if (Math.randomBoolean()) {
         reverseLeft()
     } else {
         reverseRight()
     }
-    basic.pause(randint(300, 700))
+    basic.pause(randint(500, 900))
     if (!(_inMotion)) {
         stopMoving()
     } else {
@@ -65,7 +66,7 @@ function reverseLeft () {
     } else if (_speed >= _speedThreshold) {
         _speed = _maxSpeed
     }
-    wuKong.setAllMotor(_speed, 0)
+    wuKong.setAllMotor(0, _speed)
     _inMotion = 1
 }
 input.onButtonPressed(Button.AB, function () {
@@ -112,7 +113,7 @@ function reverseRight () {
     } else if (_speed >= _speedThreshold) {
         _speed = _maxSpeed
     }
-    wuKong.setAllMotor(0, 0 - _speed)
+    wuKong.setAllMotor(0 - _speed, 0)
     _inMotion = 1
 }
 function moveLeft () {
@@ -121,12 +122,14 @@ function moveLeft () {
     } else if (_speed >= _speedThreshold) {
         _speed = _maxSpeed
     }
-    wuKong.setAllMotor(0, _speed)
+    wuKong.setAllMotor(_speed, 0)
     _inMotion = 1
 }
 function avoid_fall () {
     stopMoving()
-    basic.pause(randint(300, 700))
+    basic.pause(randint(500, 900))
+    avoid_collision()
+    basic.pause(randint(500, 900))
 }
 let _dist2 = 0
 let _dist1 = 0
