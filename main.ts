@@ -127,8 +127,12 @@ function moveLeft () {
 }
 function avoid_fall () {
     stopMoving()
-    basic.pause(randint(500, 900))
-    avoid_collision()
+    basic.pause(1000)
+    if (Math.randomBoolean()) {
+        reverseLeft()
+    } else {
+        reverseRight()
+    }
     basic.pause(randint(500, 900))
 }
 let _dist2 = 0
