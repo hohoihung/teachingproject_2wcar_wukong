@@ -155,8 +155,8 @@ _fall = 0
 _temp = 0
 basic.showIcon(IconNames.SmallHeart)
 basic.forever(function () {
-    _dist1 = sonarbit.sonarbit_distance(Distance_Unit.Distance_Unit_cm, DigitalPin.P1)
-    _dist2 = sonar.ping(
+    _dist2 = sonarbit.sonarbit_distance(Distance_Unit.Distance_Unit_cm, DigitalPin.P1)
+    _dist1 = sonar.ping(
     DigitalPin.P14,
     DigitalPin.P15,
     PingUnit.Centimeters
