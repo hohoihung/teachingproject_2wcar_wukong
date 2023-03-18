@@ -13,7 +13,7 @@ function moveRight () {
     } else if (_speed >= _speedThreshold) {
         _speed = _maxSpeed
     }
-    wuKong.setAllMotor(0, 0 - _speed)
+    wuKong.setAllMotor(0, _speed)
     _inMotion = 1
 }
 function moveForward () {
@@ -46,12 +46,15 @@ input.onLogoEvent(TouchButtonEvent.LongPressed, function () {
     serial.writeValue("fall flag", _fall)
     serial.writeValue("current move speed", _speed)
     serial.writeValue("obstacle threshold distance", _obsDistance)
-    serial.writeValue("fall threshold distance", _fallDistance)
+    serial.writeValue("fall threshold distance", 0)
     serial.writeValue("speed threshold ", _speedThreshold)
     serial.writeValue("max speed", _maxSpeed)
     serial.writeValue("in motion flag", _inMotion)
-    serial.writeValue("current fall distance", _dist2)
+    serial.writeValue("current fall distance", 0)
     serial.writeValue("current obstacle in front", _dist1)
+    serial.writeValue("Hit Line Left Edge", _lineLeftEdge)
+    serial.writeValue("Hit Line Right Edge", _lineRightEdge)
+    serial.writeValue("Line Tracking Mode", _lineTrackingMode)
 })
 input.onButtonPressed(Button.A, function () {
     moveForward()
@@ -71,7 +74,7 @@ function reverseLeft () {
 }
 input.onButtonPressed(Button.AB, function () {
     serial.writeValue("Obstacle In Front", _dist1)
-    serial.writeValue("Fall step In Front", _dist2)
+    _lineTrackingMode = 1
 })
 input.onButtonPressed(Button.B, function () {
     serial.redirectToUSB()
@@ -105,6 +108,8 @@ input.onButtonPressed(Button.B, function () {
         _temp = 0
     }
     serial.writeValue("    ---->  _temp", _temp)
+    serial.writeValue("Hit Line Right Edge", _lineRightEdge)
+    serial.writeValue("Hit Line Left Edge", _lineLeftEdge)
     basic.pause(1000)
 })
 function reverseRight () {
@@ -125,22 +130,22 @@ function moveLeft () {
     wuKong.setAllMotor(_speed, 0)
     _inMotion = 1
 }
-function avoid_fall () {
-    stopMoving()
-    basic.pause(1000)
-    if (Math.randomBoolean()) {
-        reverseLeft()
-    } else {
-        reverseRight()
+function keep_inline () {
+    if (_lineTrackingMode == 1) {
+        if (_lineLeftEdge == 0) {
+            moveRight()
+        } else if (_lineRightEdge == 0) {
+            moveLeft()
+        }
     }
-    basic.pause(randint(500, 900))
 }
-let _dist2 = 0
 let _dist1 = 0
+let _lineTrackingMode = 0
+let _lineRightEdge = 0
+let _lineLeftEdge = 0
 let _temp = 0
 let _fall = 0
 let _collide = 0
-let _fallDistance = 0
 let _obsDistance = 0
 let _speedThreshold = 0
 let _maxSpeed = 0
@@ -153,13 +158,16 @@ _inMotion = 0
 _maxSpeed = 100
 _speedThreshold = 30
 _obsDistance = 20
-_fallDistance = 7
 _collide = 0
 _fall = 0
 _temp = 0
+_lineLeftEdge = 1
+_lineRightEdge = 1
+_lineTrackingMode = 0
+pins.setPull(DigitalPin.P13, PinPullMode.PullUp)
+pins.setPull(DigitalPin.P12, PinPullMode.PullUp)
 basic.showIcon(IconNames.SmallHeart)
 basic.forever(function () {
-    _dist2 = sonarbit.sonarbit_distance(Distance_Unit.Distance_Unit_cm, DigitalPin.P1)
     _dist1 = sonar.ping(
     DigitalPin.P14,
     DigitalPin.P15,
@@ -170,16 +178,21 @@ basic.forever(function () {
     } else {
         _collide = 0
     }
-    if (_dist2 > 0 && _dist2 > _fallDistance) {
-        _fall = 1
-    } else {
-        _fall = 0
-    }
+    _lineLeftEdge = pins.digitalReadPin(DigitalPin.P12)
+    _lineRightEdge = pins.digitalReadPin(DigitalPin.P13)
     if (_inMotion && _collide) {
         avoid_collision()
         basic.showIcon(IconNames.No)
-    } else if (_inMotion && _fall) {
-        avoid_fall()
-        basic.showIcon(IconNames.Surprised)
+    } else if (_inMotion && !(_lineRightEdge)) {
+        keep_inline()
+        basic.showArrow(ArrowNames.West)
+    } else if (_inMotion && !(_lineLeftEdge)) {
+        keep_inline()
+        basic.showArrow(ArrowNames.East)
+    } else {
+        if (_inMotion) {
+            moveForward()
+            basic.clearScreen()
+        }
     }
 })
