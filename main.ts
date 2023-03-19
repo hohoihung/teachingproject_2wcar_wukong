@@ -173,7 +173,7 @@ basic.forever(function () {
     DigitalPin.P15,
     PingUnit.Centimeters
     )
-    if (_dist1 > 0 && _dist1 < _obsDistance) {
+    if (_inMotion && _dist1 < _obsDistance) {
         _collide = 1
     } else {
         _collide = 0
