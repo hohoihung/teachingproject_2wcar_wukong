@@ -139,6 +139,8 @@ function keep_inline () {
         }
     }
 }
+let _pin8 = 0
+let _pin2 = 0
 let _dist1 = 0
 let _lineTrackingMode = 0
 let _lineRightEdge = 0
@@ -156,7 +158,7 @@ wuKong.setAllMotor(0, 0)
 _speed = 10
 _inMotion = 0
 _maxSpeed = 100
-_speedThreshold = 30
+_speedThreshold = 40
 _obsDistance = 20
 _collide = 0
 _fall = 0
@@ -166,6 +168,8 @@ _lineRightEdge = 1
 _lineTrackingMode = 0
 pins.setPull(DigitalPin.P13, PinPullMode.PullUp)
 pins.setPull(DigitalPin.P12, PinPullMode.PullUp)
+pins.setPull(DigitalPin.P2, PinPullMode.PullUp)
+pins.setPull(DigitalPin.P8, PinPullMode.PullUp)
 basic.showIcon(IconNames.SmallHeart)
 basic.forever(function () {
     _dist1 = sonar.ping(
@@ -180,6 +184,8 @@ basic.forever(function () {
     }
     _lineLeftEdge = pins.digitalReadPin(DigitalPin.P12)
     _lineRightEdge = pins.digitalReadPin(DigitalPin.P13)
+    _pin2 = pins.digitalReadPin(DigitalPin.P2)
+    _pin8 = pins.digitalReadPin(DigitalPin.P8)
     if (_inMotion && _collide) {
         avoid_collision()
         basic.showIcon(IconNames.No)
@@ -189,10 +195,15 @@ basic.forever(function () {
     } else if (_inMotion && !(_lineLeftEdge)) {
         keep_inline()
         basic.showArrow(ArrowNames.East)
-    } else {
-        if (_inMotion) {
-            moveForward()
-            basic.clearScreen()
-        }
+    } else if (_inMotion && !(_pin2)) {
+        moveReverse()
+        basic.showIcon(IconNames.Triangle)
+    } else if (_inMotion && !(_pin8)) {
+        moveReverse()
+        basic.showIcon(IconNames.SmallDiamond)
+    }
+    if (_inMotion) {
+        moveForward()
+        basic.clearScreen()
     }
 })
