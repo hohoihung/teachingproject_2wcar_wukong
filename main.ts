@@ -4,8 +4,8 @@ function moveReverse () {
     } else if (_speed >= _speedThreshold) {
         _speed = _maxSpeed
     }
-    wuKong.setAllMotor(_speed, 0 - _speed)
-    _inMotion = 1
+    wuKong.stopAllMotor()
+    wuKong.setAllMotor(0 - _speed, _speed)
 }
 function moveRight () {
     if (_speed <= _speedThreshold) {
@@ -13,8 +13,8 @@ function moveRight () {
     } else if (_speed >= _speedThreshold) {
         _speed = _maxSpeed
     }
-    wuKong.setAllMotor(0, _speed)
-    _inMotion = 1
+    wuKong.stopAllMotor()
+    wuKong.setAllMotor(_speed, 0)
 }
 function moveForward () {
     if (_speed <= _speedThreshold) {
@@ -22,40 +22,22 @@ function moveForward () {
     } else if (_speed >= _speedThreshold) {
         _speed = _maxSpeed
     }
-    wuKong.setAllMotor(0 - _speed, _speed)
+    wuKong.stopAllMotor()
+    wuKong.setAllMotor(_speed, 0 - _speed)
     _inMotion = 1
 }
 function avoid_collision () {
     moveReverse()
-    basic.pause(randint(1000, 2000))
+    basic.pause(randint(400, 800))
     if (Math.randomBoolean()) {
         reverseLeft()
     } else {
         reverseRight()
     }
-    basic.pause(randint(500, 900))
-    if (!(_inMotion)) {
-        stopMoving()
-    } else {
-        moveForward()
-    }
+    basic.pause(randint(300, 1000))
+    _collide = 0
+    basic.clearScreen()
 }
-input.onLogoEvent(TouchButtonEvent.LongPressed, function () {
-    serial.writeValue("Obstacle In Front", _dist1)
-    serial.writeValue("collision flag", _collide)
-    serial.writeValue("fall flag", _fall)
-    serial.writeValue("current move speed", _speed)
-    serial.writeValue("obstacle threshold distance", _obsDistance)
-    serial.writeValue("fall threshold distance", 0)
-    serial.writeValue("speed threshold ", _speedThreshold)
-    serial.writeValue("max speed", _maxSpeed)
-    serial.writeValue("in motion flag", _inMotion)
-    serial.writeValue("current fall distance", 0)
-    serial.writeValue("current obstacle in front", _dist1)
-    serial.writeValue("Hit Line Left Edge", _lineLeftEdge)
-    serial.writeValue("Hit Line Right Edge", _lineRightEdge)
-    serial.writeValue("Line Tracking Mode", _lineTrackingMode)
-})
 input.onButtonPressed(Button.A, function () {
     moveForward()
 })
@@ -69,48 +51,44 @@ function reverseLeft () {
     } else if (_speed >= _speedThreshold) {
         _speed = _maxSpeed
     }
-    wuKong.setAllMotor(0, _speed)
-    _inMotion = 1
+    wuKong.stopAllMotor()
+    wuKong.setAllMotor(0 - _speed, 0)
 }
 input.onButtonPressed(Button.AB, function () {
-    serial.writeValue("Obstacle In Front", _dist1)
-    _lineTrackingMode = 1
+    stopMoving()
+})
+radio.onReceivedString(function (receivedString) {
+    if (receivedString == "forward") {
+        moveForward()
+        basic.pause(1000)
+    } else if (receivedString == "reverse") {
+        moveReverse()
+        basic.pause(1000)
+    } else if (receivedString == "left") {
+        moveLeft()
+        basic.pause(1000)
+    } else if (receivedString == "right") {
+        moveRight()
+        basic.pause(1000)
+    } else if (receivedString == "reverseRight") {
+        reverseRight()
+        basic.pause(1000)
+    } else if (receivedString == "reverseLeft") {
+        reverseLeft()
+        basic.pause(1000)
+    } else if (receivedString == "stop") {
+        stopMoving()
+    } else if (receivedString == "avoidCollision") {
+        avoid_collision()
+    } else {
+    	
+    }
 })
 input.onButtonPressed(Button.B, function () {
-    serial.redirectToUSB()
-    if (_temp == 0) {
-        stopMoving()
-        serial.writeString("Stop")
-        basic.pause(1000)
-    } else if (_temp == 1) {
-        moveReverse()
-        serial.writeString("move reverse")
-        basic.pause(1000)
-    } else if (_temp == 2) {
-        reverseLeft()
-        serial.writeString("reverse left")
-        basic.pause(1000)
-    } else if (_temp == 3) {
-        reverseRight()
-        serial.writeString("reverse right")
-        basic.pause(1000)
-    } else if (_temp == 4) {
-        moveLeft()
-        serial.writeString("move left")
-        basic.pause(1000)
-    } else if (_temp == 5) {
-        moveRight()
-        serial.writeString("move right")
-        basic.pause(1000)
-    }
-    _temp += 1
-    if (_temp >= 6) {
-        _temp = 0
-    }
-    serial.writeValue("    ---->  _temp", _temp)
-    serial.writeValue("Hit Line Right Edge", _lineRightEdge)
-    serial.writeValue("Hit Line Left Edge", _lineLeftEdge)
-    basic.pause(1000)
+    wuKong.stopAllMotor()
+    _pin12_high = 10
+    serial.writeValue("_pin12", _pin12)
+    _inMotion = 0
 })
 function reverseRight () {
     if (_speed <= _speedThreshold) {
@@ -118,34 +96,33 @@ function reverseRight () {
     } else if (_speed >= _speedThreshold) {
         _speed = _maxSpeed
     }
-    wuKong.setAllMotor(0 - _speed, 0)
-    _inMotion = 1
+    wuKong.stopAllMotor()
+    wuKong.setAllMotor(0, _speed)
 }
+input.onLogoEvent(TouchButtonEvent.Pressed, function () {
+    serial.writeValue("_dist1", _dist1)
+    serial.writeValue("_collide", _collide)
+    serial.writeValue("_inMotion", _inMotion)
+    serial.writeValue("Obstacle distance", _obsDistance)
+    serial.writeValue("_speed", _speed)
+})
 function moveLeft () {
     if (_speed <= _speedThreshold) {
         _speed = _speedThreshold
     } else if (_speed >= _speedThreshold) {
         _speed = _maxSpeed
     }
-    wuKong.setAllMotor(_speed, 0)
-    _inMotion = 1
+    wuKong.stopAllMotor()
+    wuKong.setAllMotor(0, 0 - _speed)
 }
-function keep_inline () {
-    if (_lineTrackingMode == 1) {
-        if (_lineLeftEdge == 0) {
-            moveRight()
-        } else if (_lineRightEdge == 0) {
-            moveLeft()
-        }
-    }
+function avoid_fall () {
+    avoid_collision()
+    _fall = 0
 }
-let _pin8 = 0
-let _pin2 = 0
+let _pin13 = 0
 let _dist1 = 0
-let _lineTrackingMode = 0
-let _lineRightEdge = 0
-let _lineLeftEdge = 0
-let _temp = 0
+let _pin12 = 0
+let _pin12_high = 0
 let _fall = 0
 let _collide = 0
 let _obsDistance = 0
@@ -154,21 +131,19 @@ let _maxSpeed = 0
 let _inMotion = 0
 let _speed = 0
 radio.setGroup(8)
-wuKong.setAllMotor(0, 0)
-_speed = 10
+wuKong.stopAllMotor()
+_speed = 45
 _inMotion = 0
 _maxSpeed = 100
-_speedThreshold = 40
-_obsDistance = 20
+_speedThreshold = 45
+_obsDistance = 12
 _collide = 0
 _fall = 0
-_temp = 0
-_lineLeftEdge = 1
-_lineRightEdge = 1
-_lineTrackingMode = 0
-pins.setPull(DigitalPin.P13, PinPullMode.PullUp)
-pins.setPull(DigitalPin.P12, PinPullMode.PullUp)
+let _temp = 0
+pins.setPull(DigitalPin.P13, PinPullMode.PullDown)
+pins.setPull(DigitalPin.P12, PinPullMode.PullDown)
 pins.setPull(DigitalPin.P2, PinPullMode.PullUp)
+_pin12_high = 1
 pins.setPull(DigitalPin.P8, PinPullMode.PullUp)
 basic.showIcon(IconNames.SmallHeart)
 basic.forever(function () {
@@ -177,33 +152,22 @@ basic.forever(function () {
     DigitalPin.P15,
     PingUnit.Centimeters
     )
-    if (_inMotion && _dist1 < _obsDistance) {
+    if (_dist1 != 0 && _dist1 < _obsDistance) {
         _collide = 1
-    } else {
-        _collide = 0
     }
-    _lineLeftEdge = pins.digitalReadPin(DigitalPin.P12)
-    _lineRightEdge = pins.digitalReadPin(DigitalPin.P13)
-    _pin2 = pins.digitalReadPin(DigitalPin.P2)
-    _pin8 = pins.digitalReadPin(DigitalPin.P8)
+    _pin13 = pins.digitalReadPin(DigitalPin.P13)
+    _pin12 = pins.digitalReadPin(DigitalPin.P12)
+    if (_pin12 == _pin12_high) {
+        wuKong.stopAllMotor()
+        basic.showIcon(IconNames.LeftTriangle)
+        avoid_fall()
+    }
     if (_inMotion && _collide) {
-        avoid_collision()
+        wuKong.stopAllMotor()
         basic.showIcon(IconNames.No)
-    } else if (_inMotion && !(_lineRightEdge)) {
-        keep_inline()
-        basic.showArrow(ArrowNames.West)
-    } else if (_inMotion && !(_lineLeftEdge)) {
-        keep_inline()
-        basic.showArrow(ArrowNames.East)
-    } else if (_inMotion && !(_pin2)) {
-        moveReverse()
-        basic.showIcon(IconNames.Triangle)
-    } else if (_inMotion && !(_pin8)) {
-        moveReverse()
-        basic.showIcon(IconNames.SmallDiamond)
+        avoid_collision()
     }
     if (_inMotion) {
         moveForward()
-        basic.clearScreen()
     }
 })
