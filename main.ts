@@ -43,13 +43,13 @@ function moveForward () {
 }
 function avoid_collision () {
     moveReverse()
-    basic.pause(randint(100, 300))
+    basic.pause(randint(60, 150))
     if (Math.randomBoolean()) {
         reverseLeft()
     } else {
         reverseRight()
     }
-    basic.pause(randint(100, 400))
+    basic.pause(randint(250, 400))
     basic.clearScreen()
     moveForward()
 }
@@ -116,6 +116,10 @@ serial.onDataReceived(serial.delimiters(Delimiters.Hash), function () {
         moveForward()
     }
 })
+pins.onPulsed(DigitalPin.P8, PulseValue.High, function () {
+    wuKong.stopAllMotor()
+    basic.showIcon(IconNames.StickFigure)
+})
 function reverseRight () {
     wuKong.stopAllMotor()
     wuKong.setAllMotor(0, _speedThreshold)
@@ -143,7 +147,7 @@ function avoid_fall () {
 }
 let _dist1 = 0
 let _pin8 = 0
-let _intensity = 0
+let _pin13 = 0
 let uart_rx = ""
 let _speed = 0
 let _speedThreshold = 0
@@ -151,14 +155,10 @@ let _maxSpeed = 0
 let _demoMode = 0
 radio.setGroup(8)
 wuKong.stopAllMotor()
-let _gain = 1
-let _gap = 100
-let _max_intensity = 60
-let _min_intensity = 20
 _demoMode = 0
 _maxSpeed = 100
-_speedThreshold = 35
-let _obsDistance = 12
+_speedThreshold = 45
+let _obsDistance = 18
 let _collide = 0
 let _fall = 0
 let _temp = 0
@@ -168,16 +168,14 @@ pins.setPull(DigitalPin.P12, PinPullMode.PullDown)
 pins.setPull(DigitalPin.P8, PinPullMode.PullDown)
 basic.showIcon(IconNames.SmallHeart)
 basic.forever(function () {
-    serial.writeValue("_pin0", pins.analogReadPin(AnalogPin.P0))
-    _intensity = Math.map(pins.analogReadPin(AnalogPin.P0), _min_intensity, _max_intensity, 1, 100)
-    _gap = Math.abs(_intensity - 50)
-    _speed = _gain * (_speedThreshold + _gap)
-    serial.writeValue("_speed", _speed)
-    serial.writeValue("_intensity", _intensity)
+    _pin13 = pins.digitalReadPin(DigitalPin.P13)
     _pin8 = pins.digitalReadPin(DigitalPin.P8)
-    if (_pin8 == 1) {
+    if (_pin13 == 1) {
         wuKong.stopAllMotor()
-        basic.showIcon(IconNames.StickFigure)
+        basic.showIcon(IconNames.No)
+        if (_demoMode == 1) {
+            avoid_collision()
+        }
     }
     _dist1 = sonar.ping(
     DigitalPin.P14,
